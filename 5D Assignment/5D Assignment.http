@@ -1,0 +1,6 @@
+@_5D_Assignment_HostAddress = http://localhost:5229
+
+GET {{_5D_Assignment_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

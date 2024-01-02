@@ -8,21 +8,21 @@
 
         public static class Products
         {
-            private const string Base = ApiRoutes.Base + "/Products";
-            public const string GetAll = Base;
-            public const string Get = Base + "/{id:int}";
-            public const string Create = Base;
-            public const string Update = Base + "/{id:int}";
-            public const string Delete = Base + "/{id:int}";
+            public const string ControllerRoute = ApiRoutes.Base + "/Products";
+            public const string GetAll = ControllerRoute;
+            public const string Get = ControllerRoute + "/{id:int}";
+            public const string Create = ControllerRoute;
+            public const string Update = ControllerRoute + "/{id:int}";
+            public const string Delete = ControllerRoute + "/{id:int}";
         }
         public static class Categories
         {
-            private const string Base = ApiRoutes.Base + "/Categories";
-            public const string GetAll = Base;
-            public const string Get = Base + "/{id:int}";
-            public const string Create = Base;
-            public const string Update = Base + "/{id:int}";
-            public const string Delete = Base + "/{id:int}";
+            public const string ControllerRoute = Base + "/Categories";
+            public const string GetAll = ControllerRoute;
+            public const string Get = ControllerRoute + "/{id:int}";
+            public const string Create = ControllerRoute;
+            public const string Update = ControllerRoute + "/{id:int}";
+            public const string Delete = ControllerRoute + "/{id:int}";
         }
     }
 }

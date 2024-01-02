@@ -4,7 +4,6 @@
     {
         DbSet<Product> Products { get; }
         DbSet<Category> Categories { get; }
-
-        int SaveChangesAsync();
+        DbSet<CartItem> CartItems { get; }
     }
 }

@@ -8,7 +8,7 @@
 
         public static class Products
         {
-            public const string ControllerRoute = ApiRoutes.Base + "/Products";
+            public const string ControllerRoute = Base + "/Products";
             public const string GetAll = ControllerRoute;
             public const string Get = ControllerRoute + "/{id:int}";
             public const string Create = ControllerRoute;

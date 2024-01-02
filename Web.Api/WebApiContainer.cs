@@ -1,4 +1,5 @@
-﻿using Web.Api.Services;
+﻿using System.Reflection;
+using Web.Api.Services;
 namespace Web.Api
 {
     public static class WebApiContainer
@@ -7,6 +8,7 @@ namespace Web.Api
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
+            services.AddAutoMapper(Assembly.GetExecutingAssembly());
             return services;
         }
     }

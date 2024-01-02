@@ -14,10 +14,10 @@ namespace Infrastructure
 {
     public static class InfrastructureContainer
     {
-        public static IServiceCollection AddInfrastructureServices(this  IServiceCollection services,IConfigurationManager configuration)
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfigurationManager configuration)
         {
             services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
-            services.AddDbContext<IAppDbContext, AppDbContext>((serviceProvider,options) => 
+            services.AddDbContext<IAppDbContext, AppDbContext>((serviceProvider, options) =>
             {
                 options.AddInterceptors(serviceProvider.GetServices<AuditableEntityInterceptor>());
 

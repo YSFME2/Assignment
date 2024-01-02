@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
-    <RootNamespace>_5D_Assignment</RootNamespace>
+    <RootNamespace>Web.Api</RootNamespace>
     <UserSecretsId>9f57cfd5-b40b-419c-ade1-ee664a23fee9</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>

@@ -12,7 +12,7 @@
 
         public DateTime? LastModifiedOn { get; set; }
         public string? LastModifiedById { get; set; }
-        public AppUser? LastModifiedBy { get;set; }
+        public AppUser? LastModifiedBy { get; set; }
 
 
         public bool IsDeleted { get; set; }

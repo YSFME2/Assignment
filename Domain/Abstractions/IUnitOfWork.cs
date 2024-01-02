@@ -2,11 +2,11 @@
 
 namespace Domain.Abstractions
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork : IDisposable
     {
-        IGenericRepository<Category> GenericRepository { get; }
+        IGenericRepository<Category> CategoryRepository { get; }
         IProductRepositories ProductRepository { get; }
-        ICartItemRepository ICartItemRepository { get; }
+        ICartItemRepository CartItemRepository { get; }
 
         Task<int> Complete();
     }

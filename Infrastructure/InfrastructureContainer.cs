@@ -23,6 +23,14 @@ namespace Infrastructure
 
                 options.UseLazyLoadingProxies().UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
+
+            //using (var dbContext = services.BuildServiceProvider().GetService<AppDbContext>())
+            //{
+            //    if (dbContext.Database.GetPendingMigrations().Any())
+            //        dbContext.Database.Migrate();
+            //}
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             return services;
         }
     }

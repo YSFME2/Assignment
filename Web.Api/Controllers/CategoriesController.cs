@@ -2,10 +2,12 @@
 using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Web.Contracts.v1.Responses.Errors;
 
 namespace Web.Api.Controllers
 {
     [ApiController]
+    [Produces("application/json")]
     public class CategoriesController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -16,6 +18,7 @@ namespace Web.Api.Controllers
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
+
         [HttpGet(ApiRoutes.Categories.GetAll)]
         [ProducesResponseType(typeof(List<CategoryResponse>), 200)]
         public async Task<IActionResult> GetAll()
@@ -25,18 +28,18 @@ namespace Web.Api.Controllers
 
         [HttpPost(ApiRoutes.Categories.Create)]
         [ProducesResponseType(typeof(CategoryResponse), 200)]
-        [ProducesResponseType(typeof(string), 400)]
         public async Task<IActionResult> CreateAsync(UpsertCategoryRequest request)
         {
             var category = _mapper.Map<Category>(request);
             await _unitOfWork.CategoryRepository.AddAsync(category);
-            return await _unitOfWork.Complete() > 0 ? Ok(_mapper.Map<CategoryResponse>(category)) : BadRequest("Data not saved!");
+            return await _unitOfWork.Complete() > 0 ? 
+                Ok(_mapper.Map<CategoryResponse>(category)) 
+                : BadRequest((ErrorResponse)"Data not saved!");
         }
 
 
         [HttpPut(ApiRoutes.Categories.Update)]
         [ProducesResponseType(typeof(CategoryResponse), 200)]
-        [ProducesResponseType(typeof(string), 400)]
         public async Task<IActionResult> UpdateAsync(int id, UpsertCategoryRequest request)
         {
             var category = _mapper.Map<Category>(request);
@@ -48,7 +51,6 @@ namespace Web.Api.Controllers
 
         [HttpDelete(ApiRoutes.Categories.Delete)]
         [ProducesResponseType(typeof(string), 200)]
-        [ProducesResponseType(typeof(string), 400)]
         public async Task<IActionResult> DeleteAsync(int id)
         {
             var result = await _unitOfWork.CategoryRepository.Delete(id);

@@ -10,7 +10,7 @@ namespace Web.Contracts.v1.Requests
 {
     public record UpsertCategoryRequest
     {
-        [MaxLength(250),MinLength(3),DisallowNull]
+        [Range(3,250)]
         public string Name { get; init; } = null!;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Domain.Abstractions;
 using Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Web.Contracts.v1.Responses.Errors;
@@ -26,18 +27,31 @@ namespace Web.Api.Controllers
             return Ok(_mapper.Map<IEnumerable<CategoryResponse>>(await _unitOfWork.CategoryRepository.GetAllAsync()));
         }
 
+        [HttpGet(ApiRoutes.Categories.Get)]
+        [ProducesResponseType(typeof(CategoryResponse), 200)]
+        [Authorize]
+        public async Task<IActionResult> Get(int id)
+        {
+            var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
+            return category is not null ? 
+                Ok(_mapper.Map<CategoryResponse>(category)) 
+                : NotFound("Not Found Category");
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpPost(ApiRoutes.Categories.Create)]
         [ProducesResponseType(typeof(CategoryResponse), 200)]
         public async Task<IActionResult> CreateAsync(UpsertCategoryRequest request)
         {
             var category = _mapper.Map<Category>(request);
             await _unitOfWork.CategoryRepository.AddAsync(category);
-            return await _unitOfWork.Complete() > 0 ? 
-                Ok(_mapper.Map<CategoryResponse>(category)) 
+            return await _unitOfWork.Complete() > 0 ?
+                Ok(_mapper.Map<CategoryResponse>(category))
                 : BadRequest((ErrorResponse)"Data not saved!");
         }
 
 
+        [Authorize(Roles = "Admin")]
         [HttpPut(ApiRoutes.Categories.Update)]
         [ProducesResponseType(typeof(CategoryResponse), 200)]
         public async Task<IActionResult> UpdateAsync(int id, UpsertCategoryRequest request)
@@ -49,6 +63,7 @@ namespace Web.Api.Controllers
         }
 
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete(ApiRoutes.Categories.Delete)]
         [ProducesResponseType(typeof(string), 200)]
         public async Task<IActionResult> DeleteAsync(int id)

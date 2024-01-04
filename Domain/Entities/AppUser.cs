@@ -5,6 +5,9 @@ namespace Domain.Entities
 {
     public class AppUser : IdentityUser
     {
-        public Roles Role { get; set; }
+        [Range(2,150)]
+        public string ProfileName { get; set; } = null!;
+
+        public ICollection<RefreshToken> RefreshTokens { get; set; }
     }
 }

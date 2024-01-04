@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Web.Api.Controllers
 {
     [Route("/[controller]")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     [ApiController]
     public class ErrorsController : ControllerBase
     {

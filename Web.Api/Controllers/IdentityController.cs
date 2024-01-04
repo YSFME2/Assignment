@@ -1,4 +1,5 @@
 ﻿using Web.Contracts.v1.Responses.Identity;
+using Web.Contracts.v1.Requests.Identity;
 
 namespace Web.Api.Controllers
 {
@@ -14,9 +15,13 @@ namespace Web.Api.Controllers
             _mapper = mapper;
         }
 
+
+        /// <summary>
+        /// Register with User role
+        /// </summary>
         [HttpPost(ApiRoutes.Identity.Register)]
-        [ProducesResponseType(typeof(AuthenticationResponse), 200)]
-        [ProducesResponseType(typeof(List<ErrorResponse>), 400)]
+        [ProducesResponseType<AuthenticationResponse>(200)]
+        [ProducesResponseType<List<ErrorResponse>>(400)]
         public async Task<IActionResult> RegisterAsync(RegisterRequest register)
         {
             var result = await _identityServices.RegisterAsync(register.ProfileName, register.Email, register.Password, register.Phone);
@@ -31,9 +36,13 @@ namespace Web.Api.Controllers
         }
 
 
+
+        /// <summary>
+        /// Register with Admin role
+        /// </summary>
         [HttpPost(ApiRoutes.Identity.RegisterAsAdmin)]
-        [ProducesResponseType(typeof(AuthenticationResponse), 200)]
-        [ProducesResponseType(typeof(List<ErrorResponse>), 400)]
+        [ProducesResponseType<AuthenticationResponse>(200)]
+        [ProducesResponseType<List<ErrorResponse>>(400)]
         public async Task<IActionResult> RegisterAsAdminAsync(RegisterRequest register)
         {
             var result = await _identityServices.RegisterAsAdminAsync(register.ProfileName, register.Email, register.Password, register.Phone);
@@ -49,9 +58,12 @@ namespace Web.Api.Controllers
 
 
 
+        /// <summary>
+        /// Login user
+        /// </summary>
         [HttpPost(ApiRoutes.Identity.Login)]
-        [ProducesResponseType(typeof(AuthenticationResponse), 200)]
-        [ProducesResponseType(typeof(List<ErrorResponse>), 400)]
+        [ProducesResponseType<AuthenticationResponse>(200)]
+        [ProducesResponseType<List<ErrorResponse>>(400)]
         public async Task<IActionResult> LoginAsync(LoginRequest login)
         {
             var result = await _identityServices.LoginAsync(login.Email, login.Password);
@@ -66,9 +78,13 @@ namespace Web.Api.Controllers
         }
 
 
+
+        /// <summary>
+        ///  Create new Token using Refresh Token
+        /// </summary>
         [HttpPost(ApiRoutes.Identity.RefreshToken)]
-        [ProducesResponseType(typeof(AuthenticationResponse), 200)]
-        [ProducesResponseType(typeof(List<ErrorResponse>), 400)]
+        [ProducesResponseType<AuthenticationResponse>(200)]
+        [ProducesResponseType<List<ErrorResponse>>(400)]
         public async Task<IActionResult> RefreshTokenAsync(RefreshTokenRequest? request = null)
         {
             var token = request?.RefreshToken ?? Request.Cookies["RT"];
@@ -84,42 +100,55 @@ namespace Web.Api.Controllers
         }
 
 
+
+        /// <summary>
+        /// Revoke Refresh Token
+        /// </summary>
         [HttpPost(ApiRoutes.Identity.RevokeRefreshToken)]
-        [ProducesResponseType(typeof(AuthenticationResponse), 200)]
-        [ProducesResponseType(typeof(List<ErrorResponse>), 400)]
+        [ProducesResponseType<AuthenticationResponse>(200)]
+        [ProducesResponseType<List<ErrorResponse>>(400)]
         public async Task<IActionResult> RevokeRefreshTokenAsync(RefreshTokenRequest? request = null)
         {
             var token = request?.RefreshToken ?? Request.Cookies["RT"];
             var result = await _identityServices.RevokeRefreshTokenAsync(token);
-           
+
             return result.IsSuccess ?
                 Ok(_mapper.Map<AuthenticationResponse>(result))
                 : BadRequest(_mapper.Map<List<ErrorResponse>>(result.Errors));
         }
 
 
+
+        /// <summary>
+        ///  Add Role to User
+        /// </summary>
         [Authorize(Roles = "Admin")]
         [HttpPost(ApiRoutes.Identity.AddUserToRole)]
-        [ProducesResponseType(typeof(ChangeUserRoleResponse), 200)]
-        [ProducesResponseType(typeof(List<ErrorResponse>), 400)]
+        [ProducesResponseType<ChangeUserRoleResponse>(200)]
+        [ProducesResponseType<List<ErrorResponse>>(400)]
         public async Task<IActionResult> AddUserToRoleAsync(ChangeUserRoleRequest request)
         {
             var result = await _identityServices.AssignRoleAsync(request.UserId, request.Role);
-            
+
             return result.IsSuccess ?
                 Ok(_mapper.Map<ChangeUserRoleResponse>(result))
                 : BadRequest(_mapper.Map<List<ErrorResponse>>(result.Errors));
         }
 
 
+
+
+        /// <summary>
+        ///  Remove Role from User
+        /// </summary>
         [Authorize(Roles = "Admin")]
         [HttpPost(ApiRoutes.Identity.RemoveUserFromRole)]
-        [ProducesResponseType(typeof(ChangeUserRoleResponse), 200)]
-        [ProducesResponseType(typeof(List<ErrorResponse>), 400)]
+        [ProducesResponseType<ChangeUserRoleResponse>(200)]
+        [ProducesResponseType<List<ErrorResponse>>( 400)]
         public async Task<IActionResult> RemoveUserFromRoleAsync(ChangeUserRoleRequest request)
         {
             var result = await _identityServices.RemoveRoleAsync(request.UserId, request.Role);
-           
+
             return result.IsSuccess ?
                 Ok(_mapper.Map<ChangeUserRoleResponse>(result))
                 : BadRequest(_mapper.Map<List<ErrorResponse>>(result.Errors));

@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace Web.Contracts.v1.Requests
 {
-    public record UpsertCategoryRequest
+    public record CategoryRequest
     {
         [Length(3, 150)]
-        public string Name { get; set; } = null!;
+        public string Name { get; init; } = null!;
         [MaxLength(500)]
-        public string? Description { get; set; }
+        public string? Description { get; init; }
     }
 }

@@ -16,50 +16,39 @@ namespace Infrastructure.Repositories
     {
         protected readonly AppDbContext _dbContext;
         protected readonly DbSet<TEntity> _dbSet;
+        protected IQueryable<TEntity> _queryable;
 
         public GenericRepository(AppDbContext dbContext)
         {
             _dbContext = dbContext;
             _dbSet = _dbContext.Set<TEntity>();
+            _queryable = _dbSet.AsQueryable().Where(x => !x.IsDeleted);
         }
+
+        public async Task<TEntity?> GetByIdAsync(int id)
+            => await _queryable.FirstOrDefaultAsync(x => x.Id == id);
+
+        public async Task<IEnumerable<TEntity>> GetAllAsync()
+            => _queryable;
+
+        public async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> filter)
+            => _queryable.Where(filter).AsQueryable();
+
         public async Task AddAsync(TEntity entity)
-        {
-            await _dbSet.AddAsync(entity);
-        }
+            => await _dbSet.AddAsync(entity);
 
         public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> filter)
-        {
-            return await _dbSet.AnyAsync(filter);
-        }
+            => await _queryable.AnyAsync(filter);
 
-        public bool Delete(TEntity entity)
-        {
-            entity.IsDeleted = true;
-            return true;
-        }
         public async Task<bool> Delete(int id)
         {
-            var entity = await GetByIdAsync(id);
+            var entity = await _queryable.FirstOrDefaultAsync(x => x.Id == id);
             if (entity != null)
             {
                 entity.IsDeleted = true;
                 return true;
             }
             return false;
-        }
-
-        public async Task<IEnumerable<TEntity>> GetAllAsync()
-        {
-            return _dbSet;
-        }
-        public async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> filter)
-        {
-            return _dbSet.Where(filter).AsQueryable();
-        }
-
-        public async Task<TEntity?> GetByIdAsync(int id)
-        {
-            return await _dbSet.FindAsync(id);
         }
     }
 }

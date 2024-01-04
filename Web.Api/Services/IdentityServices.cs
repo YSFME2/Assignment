@@ -181,7 +181,7 @@ namespace Web.Api.Services
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSettings.Secret));
             var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
 
-            var expiration = DateTime.Now.AddMinutes(_jwtSettings.ExpirationInHours);
+            var expiration = DateTime.Now.AddDays(_jwtSettings.ExpirationInHours);
 
             var jwtSecurityToken = new JwtSecurityToken(
                 issuer: _jwtSettings.Issuer,

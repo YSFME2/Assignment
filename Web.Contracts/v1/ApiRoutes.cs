@@ -21,6 +21,7 @@
         {
             public const string ControllerRoute = Base + "/Products";
             public const string GetAll = ControllerRoute;
+            public const string GetFiltered = ControllerRoute +"/Filtered";
             public const string Get = ControllerRoute + "/{id:int}";
             public const string Create = ControllerRoute;
             public const string Update = ControllerRoute + "/{id:int}";
@@ -33,6 +34,15 @@
             public const string Get = ControllerRoute + "/{id:int}";
             public const string Create = ControllerRoute;
             public const string Update = ControllerRoute + "/{id:int}";
+            public const string Delete = ControllerRoute + "/{id:int}";
+        }
+        public static class CartItems
+        {
+            public const string ControllerRoute = Base + "/Categories";
+            public const string GetAll = ControllerRoute;
+            public const string Get = ControllerRoute + "/{id:int}";
+            public const string Add = ControllerRoute;
+            public const string UpdateQuantity = ControllerRoute + "/{id:int}";
             public const string Delete = ControllerRoute + "/{id:int}";
         }
 

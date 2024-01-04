@@ -9,7 +9,6 @@ namespace Domain.Abstractions
         Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> filter);
         Task<bool> AnyAsync(Expression<Func<TEntity, bool>> filter);
         Task AddAsync(TEntity entity);
-        bool Delete(TEntity entity);
         Task<bool> Delete(int id);
     }
 }

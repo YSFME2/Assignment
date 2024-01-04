@@ -18,7 +18,7 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<CartItem>> GetUserItemsAsync(string userId)
         {
-            return await _dbSet.Where(x => x.UserId == userId).ToListAsync();
+            return await _queryable.Where(x => x.UserId == userId).ToListAsync();
         }
     }
 }

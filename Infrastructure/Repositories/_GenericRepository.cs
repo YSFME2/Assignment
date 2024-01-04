@@ -26,6 +26,11 @@ namespace Infrastructure.Repositories
             await _dbSet.AddAsync(entity);
         }
 
+        public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> filter)
+        {
+            return await _dbSet.AnyAsync(filter);
+        }
+
         public bool Delete(TEntity entity)
         {
             entity.IsDeleted = true;
@@ -44,7 +49,7 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<TEntity>> GetAllAsync()
         {
-            return  _dbSet;
+            return _dbSet;
         }
         public async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> filter)
         {

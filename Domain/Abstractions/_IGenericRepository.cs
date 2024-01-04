@@ -7,6 +7,7 @@ namespace Domain.Abstractions
         Task<TEntity?> GetByIdAsync(int id);
         Task<IEnumerable<TEntity>> GetAllAsync();
         Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> filter);
+        Task<bool> AnyAsync(Expression<Func<TEntity, bool>> filter);
         Task AddAsync(TEntity entity);
         TEntity Update(TEntity entity);
         bool Delete(TEntity entity);

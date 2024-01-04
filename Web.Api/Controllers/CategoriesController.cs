@@ -1,11 +1,4 @@
-﻿using Domain.Abstractions;
-using Domain.Entities;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Web.Contracts.v1.Responses.Errors;
-
-namespace Web.Api.Controllers
+﻿namespace Web.Api.Controllers
 {
     [ApiController]
     [Produces("application/json")]
@@ -22,21 +15,22 @@ namespace Web.Api.Controllers
 
         [HttpGet(ApiRoutes.Categories.GetAll)]
         [ProducesResponseType(typeof(List<CategoryResponse>), 200)]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAlAsync()
         {
             return Ok(_mapper.Map<IEnumerable<CategoryResponse>>(await _unitOfWork.CategoryRepository.GetAllAsync()));
         }
 
+        [Authorize]
         [HttpGet(ApiRoutes.Categories.Get)]
         [ProducesResponseType(typeof(CategoryResponse), 200)]
-        [Authorize]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> GetAsync(int id)
         {
             var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
-            return category is not null ? 
-                Ok(_mapper.Map<CategoryResponse>(category)) 
-                : NotFound("Not Found Category");
+            return category is not null ?
+                Ok(_mapper.Map<CategoryResponse>(category))
+                : NotFound("Not Found Category with Id " + id);
         }
+
 
         [Authorize(Roles = "Admin")]
         [HttpPost(ApiRoutes.Categories.Create)]
@@ -56,6 +50,9 @@ namespace Web.Api.Controllers
         [ProducesResponseType(typeof(CategoryResponse), 200)]
         public async Task<IActionResult> UpdateAsync(int id, UpsertCategoryRequest request)
         {
+            if (!await _unitOfWork.CategoryRepository.AnyAsync(x => x.Id == id))
+                return NotFound("Not Found Category with Id " + id);
+
             var category = _mapper.Map<Category>(request);
             category.Id = id;
             _unitOfWork.CategoryRepository.Update(category);
@@ -68,6 +65,9 @@ namespace Web.Api.Controllers
         [ProducesResponseType(typeof(string), 200)]
         public async Task<IActionResult> DeleteAsync(int id)
         {
+            if (!await _unitOfWork.CategoryRepository.AnyAsync(x => x.Id == id))
+                return NotFound("Not Found Category with Id " + id);
+
             var result = await _unitOfWork.CategoryRepository.Delete(id);
             return await _unitOfWork.Complete() > 0 && result ? Ok("Category deleted successfully!") : BadRequest("Data not saved!");
         }

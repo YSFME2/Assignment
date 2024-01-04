@@ -7,4 +7,8 @@ global using Web.Contracts.v1.Responses;
 global using Web.Contracts.v1.Requests;
 global using Domain.Entities;
 global using Microsoft.Extensions.DependencyInjection;
-
+global using Microsoft.AspNetCore.Mvc;
+global using Web.Contracts.v1.Requests.Identity;
+global using Domain.Abstractions;
+global using Microsoft.AspNetCore.Authorization;
+global using Web.Contracts.v1.Responses.Errors;

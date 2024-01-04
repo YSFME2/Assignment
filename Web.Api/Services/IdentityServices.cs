@@ -25,30 +25,40 @@ namespace Web.Api.Services
             _roleManager = roleManager;
         }
 
-        public async Task<ChangeUserRoleResult> AssignRole(string userId, string role)
+        public async Task<AuthenticationResult> RegisterAsync(string profileName, string email, string password, string phone)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null || !await _roleManager.RoleExistsAsync(role))
-                return new() { Errors = [new("ChangeUserRole", "User Id or Role is invalid!")] };
-
-            await _userManager.AddToRoleAsync(user, role);
-            return new ChangeUserRoleResult { IsSuccess = true };
-        }
-
-        public async Task<AuthenticationResult> Login(string email, string password)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user is null || !await _userManager.CheckPasswordAsync(user, password))
+            var x = _jwtSettings.Secret;
+            var existingUser = await _userManager.FindByEmailAsync(email);
+            if (existingUser is not null)
             {
                 return new AuthenticationResult
                 {
-                    Errors = [new("UserCredentials", "User not Exist or wrong credentials")]
+                    Errors = [new("Register", "Email is already exist")]
                 };
             }
-            return await GenerateToken(user);
+
+            var appUser = new AppUser
+            {
+                Email = email,
+                UserName = email,
+                ProfileName = profileName,
+            };
+
+            var result = await _userManager.CreateAsync(appUser, password.Trim());
+            if (!result.Succeeded)
+            {
+                return new AuthenticationResult
+                {
+                    Errors = result.Errors.Select(error => new Error(error.Code, error.Description)).ToList(),
+                };
+            }
+
+            await _userManager.AddToRoleAsync(appUser, "User");
+
+            return await GenerateToken(appUser);
         }
 
-        public async Task<AuthenticationResult> Registration(string email, string password, string phone, string profileName)
+        public async Task<AuthenticationResult> RegisterAsAdminAsync(string profileName, string email, string password, string phone)
         {
             var x = _jwtSettings.Secret;
             var existingUser = await _userManager.FindByEmailAsync(email);
@@ -76,18 +86,31 @@ namespace Web.Api.Services
                 };
             }
 
-            await _userManager.AddToRoleAsync(appUser, "User");
+            await _userManager.AddToRoleAsync(appUser, "Admin");
 
             return await GenerateToken(appUser);
         }
 
-        public async Task<AuthenticationResult> RefreshToken(string refreshToken)
+        public async Task<AuthenticationResult> LoginAsync(string email, string password)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null || !await _userManager.CheckPasswordAsync(user, password))
+            {
+                return new AuthenticationResult
+                {
+                    Errors = [new("UserCredentials", "User not Exist or wrong credentials")]
+                };
+            }
+            return await GenerateToken(user);
+        }
+
+        public async Task<AuthenticationResult> RefreshTokenAsync(string refreshToken)
         {
             var user = await _userManager.Users.SingleOrDefaultAsync(x => x.RefreshTokens.Any(t => t.Token == refreshToken));
             if (user == null)
             {
                 var result = new AuthenticationResult() { Errors = new List<Error>() };
-                result.Errors.Add(new Error("RefreshToken", "Invalid or Expired Refresh Token"));
+                result.Errors.Add(new Error("RefreshTokenAsync", "Invalid or Expired Refresh Token"));
                 return result;
             }
 
@@ -95,7 +118,7 @@ namespace Web.Api.Services
             if (!token.IsActive)
             {
                 var result = new AuthenticationResult() { Errors = new List<Error>() };
-                result.Errors.Add(new Error("RefreshToken", "Invalid or Expired Refresh Token"));
+                result.Errors.Add(new Error("RefreshTokenAsync", "Invalid or Expired Refresh Token"));
                 return result;
             }
 
@@ -105,20 +128,40 @@ namespace Web.Api.Services
             return await GenerateToken(user);
         }
 
-        public async Task<AuthenticationResult> RevokeRefreshToken(string refreshToken)
+        public async Task<AuthenticationResult> RevokeRefreshTokenAsync(string refreshToken)
         {
             var user = await _userManager.Users.SingleOrDefaultAsync(x => x.RefreshTokens.Any(t => t.Token == refreshToken));
             if (user == null)
-                return new() {Errors = [new("RevokeRefreshToken", "Invalid refresh token")] };
+                return new() { Errors = [new("RevokeRefreshTokenAsync", "Invalid refresh token")] };
 
 
             var token = user.RefreshTokens.First(x => x.Token == refreshToken);
             if (!token.IsActive)
-                return new() {IsSuccess = true };
+                return new() { IsSuccess = true };
 
             token.RevokedOn = DateTime.Now;
             await _userManager.UpdateAsync(user);
             return new() { IsSuccess = true };
+        }
+
+        public async Task<ChangeUserRoleResult> AssignRoleAsync(string userId, string role)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null || !await _roleManager.RoleExistsAsync(role))
+                return new() { Errors = [new("ChangeUserRole", "User Id or Role is invalid!")] };
+
+            await _userManager.AddToRoleAsync(user, role);
+            return new ChangeUserRoleResult { IsSuccess = true };
+        }
+
+        public async Task<ChangeUserRoleResult> RemoveRoleAsync(string userId, string role)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null || !await _roleManager.RoleExistsAsync(role) || !await _userManager.IsInRoleAsync(user, role))
+                return new() { Errors = [new("ChangeUserRole", "User Id or Role is invalid!")] };
+
+            await _userManager.RemoveFromRoleAsync(user, role);
+            return new ChangeUserRoleResult { IsSuccess = true };
         }
 
         private async Task<AuthenticationResult> GenerateToken(AppUser user)
@@ -138,7 +181,7 @@ namespace Web.Api.Services
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSettings.Secret));
             var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
 
-            var expiration = DateTime.Now.AddHours(_jwtSettings.ExpirationInHours);
+            var expiration = DateTime.Now.AddMinutes(_jwtSettings.ExpirationInHours);
 
             var jwtSecurityToken = new JwtSecurityToken(
                 issuer: _jwtSettings.Issuer,
@@ -182,17 +225,6 @@ namespace Web.Api.Services
                 CreatedOn = DateTime.Now,
                 ExpireOn = DateTime.Now.AddDays(_jwtSettings.RefreshExpirationInDays),
             };
-        }
-
-
-        public async Task<ChangeUserRoleResult> RemoveRole(string userId, string role)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null || !await _roleManager.RoleExistsAsync(role) || !await _userManager.IsInRoleAsync(user,role))
-                return new() { Errors = [new("ChangeUserRole", "User Id or Role is invalid!")] };
-
-            await _userManager.RemoveFromRoleAsync(user, role);
-            return new ChangeUserRoleResult { IsSuccess = true };
         }
     }
 }

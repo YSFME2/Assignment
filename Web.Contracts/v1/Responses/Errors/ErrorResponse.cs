@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace Web.Contracts.v1.Responses.Errors
 {
-    public record ErrorResponse
+    public record ErrorResponse(string Code, string Description)
     {
-        public List<ErrorModel> Errors { get; init; }
-
-        public static implicit operator ErrorResponse(string message) => new ErrorResponse() { Errors = new List<ErrorModel>() { new ErrorModel() { Message = message } } };
+        public static implicit operator ErrorResponse(string description) => new ErrorResponse("Error", description);
     }
 }

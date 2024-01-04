@@ -38,10 +38,10 @@
         }
         public static class CartItems
         {
-            public const string ControllerRoute = Base + "/Categories";
+            public const string ControllerRoute = Base + "/CartItems";
             public const string GetAll = ControllerRoute;
             public const string Get = ControllerRoute + "/{id:int}";
-            public const string Add = ControllerRoute;
+            public const string Create = ControllerRoute;
             public const string UpdateQuantity = ControllerRoute + "/{id:int}";
             public const string Delete = ControllerRoute + "/{id:int}";
         }

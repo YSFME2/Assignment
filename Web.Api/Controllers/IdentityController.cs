@@ -120,7 +120,7 @@ namespace Web.Api.Controllers
 
 
         /// <summary>
-        ///  Add Role to User
+        ///  Create Role to User
         /// </summary>
         [Authorize(Roles = "Admin")]
         [HttpPost(ApiRoutes.Identity.AddUserToRole)]

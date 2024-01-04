@@ -1,23 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Web.Contracts.v1.Requests
 {
-    public record ProductRequest
+    public record UpsertCategoryRequest
     {
-        [MaxLength(250)]
+        [Length(3, 150)]
         public string Name { get; init; } = null!;
-        [MaxLength(1000)]
+        [MaxLength(500)]
         public string? Description { get; init; }
-        [Range(0, double.MaxValue)]
-        public decimal Price { get; init; }
-        [Range(0, 1)]
-        public decimal DiscountPercent { get; set; }
-
-        public int CategoryId { get; init; }
     }
 }

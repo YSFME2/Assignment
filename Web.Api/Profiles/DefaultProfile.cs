@@ -8,10 +8,11 @@ namespace Web.Api.Profiles
     {
         public DefaultProfile()
         {
-            CreateMap<CategoryRequest, Category>();
+            CreateMap<UpsertCategoryRequest, Category>();
             CreateMap<Category, CategoryResponse>();
             CreateMap<Product, ProductResponse>();
-            CreateMap<ProductRequest, Product>();
+            CreateMap<UpsertProductRequest, Product>();
+            CreateMap<CartItem, CartItemResponse>();
 
             CreateMap<AuthenticationResult, AuthenticationResponse>();
             CreateMap<AuthenticationResult, AuthenticationResponse>();

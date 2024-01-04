@@ -19,7 +19,7 @@
         /// </summary>
         [HttpGet(ApiRoutes.Categories.GetAll)]
         [ProducesResponseType<List<CategoryResponse>>(200)]
-        public async Task<IActionResult> GetAlAsync()
+        public async Task<IActionResult> GetAllAsync()
         {
             return Ok(_mapper.Map<IEnumerable<CategoryResponse>>(await _unitOfWork.CategoryRepository.GetAllAsync()));
         }
@@ -50,7 +50,7 @@
         [HttpPost(ApiRoutes.Categories.Create)]
         [ProducesResponseType<CategoryResponse>(200)]
         [ProducesResponseType<ErrorResponse>(400)]
-        public async Task<IActionResult> CreateAsync(CategoryRequest request)
+        public async Task<IActionResult> CreateAsync(UpsertCategoryRequest request)
         {
             var category = _mapper.Map<Category>(request);
             await _unitOfWork.CategoryRepository.AddAsync(category);
@@ -69,7 +69,7 @@
         [ProducesResponseType<CategoryResponse>(200)]
         [ProducesResponseType<ErrorResponse>(400)]
         [ProducesResponseType<ErrorResponse>(404)]
-        public async Task<IActionResult> UpdateAsync(int id, CategoryRequest request)
+        public async Task<IActionResult> UpdateAsync(int id, UpsertCategoryRequest request)
         {
             var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
             if (category is null)

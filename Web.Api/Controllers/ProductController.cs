@@ -68,7 +68,7 @@ namespace Web.Api.Controllers
         /// <response code="400">Data not saved!</response>
         [Authorize(Roles = "Admin")]
         [HttpPost(ApiRoutes.Products.Create)]
-        public async Task<IActionResult> CreateAsync(ProductRequest request)
+        public async Task<IActionResult> CreateAsync(UpsertProductRequest request)
         {
             var product = _mapper.Map<Product>(request);
             await _unitOfWork.ProductRepository.AddAsync(product);
@@ -88,7 +88,7 @@ namespace Web.Api.Controllers
         /// <response code="404">Product not found!</response>
         [Authorize(Roles = "Admin")]
         [HttpPut(ApiRoutes.Products.Update)]
-        public async Task<IActionResult> UpdateAsync(int id, ProductRequest request)
+        public async Task<IActionResult> UpdateAsync(int id, UpsertProductRequest request)
         {
             var product = await _unitOfWork.ProductRepository.GetByIdAsync(id);
             if (product is null)

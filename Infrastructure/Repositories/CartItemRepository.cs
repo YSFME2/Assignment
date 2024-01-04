@@ -14,6 +14,12 @@ namespace Infrastructure.Repositories
 
         public CartItemRepository(AppDbContext dbContext):base(dbContext) 
         {
+            _queryable = _queryable.Include(x => x.Product);
+        }
+
+        public async Task<CartItem> GetUserItemByIdAsync(int cartItemId, string userId)
+        {
+            return await _queryable.FirstOrDefaultAsync(x=>x.Id == cartItemId && x.UserId == userId);
         }
 
         public async Task<IEnumerable<CartItem>> GetUserItemsAsync(string userId)

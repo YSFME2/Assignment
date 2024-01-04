@@ -14,10 +14,12 @@ namespace Web.Api.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public ProductController(IUnitOfWork unitOfWork, IMapper mapper)
+        private readonly ICacheService _cacheService;
+        public ProductController(IUnitOfWork unitOfWork, IMapper mapper, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _cacheService = cacheService;
         }
 
 
@@ -28,7 +30,8 @@ namespace Web.Api.Controllers
         [HttpGet(ApiRoutes.Products.GetAll)]
         public async Task<IActionResult> GetAllAsync()
         {
-            return Ok(_mapper.Map<IEnumerable<ProductResponse>>(await _unitOfWork.ProductRepository.GetAllAsync()));
+            IEnumerable<Product>? products = await GetCachedProducts();
+            return Ok(_mapper.Map<IEnumerable<ProductResponse>>(products));
         }
 
         /// <summary>
@@ -36,9 +39,15 @@ namespace Web.Api.Controllers
         /// </summary>
         /// <response code="200">List of products</response>
         [HttpGet(ApiRoutes.Products.GetFiltered)]
-        public async Task<IActionResult> GetFilteredAsync([FromQuery]ProductFilterRequest filter)
+        public async Task<IActionResult> GetFilteredAsync([FromQuery] ProductFilterRequest filter)
         {
-            return Ok(_mapper.Map<IEnumerable<ProductResponse>>(await _unitOfWork.ProductRepository.GetFilterAsync(filter.FilterText,filter.CategoryId,filter.PriceFrom,filter.PriceTo)));
+            return Ok(_mapper.Map<IEnumerable<ProductResponse>>(await _unitOfWork
+                .ProductRepository
+                .GetFilterAsync(
+                filter.FilterText, 
+                filter.CategoryId, 
+                filter.PriceFrom, 
+                filter.PriceTo)));
         }
 
 
@@ -52,8 +61,8 @@ namespace Web.Api.Controllers
         [HttpGet(ApiRoutes.Products.Get)]
         public async Task<IActionResult> GetAsync(int id)
         {
-           var product = await _unitOfWork.ProductRepository.GetByIdAsync(id);
-            if(product is null)
+            var product = (await GetCachedProducts()).FirstOrDefault(x=>x.Id == id);
+            if (product is null)
                 return NotFound((ErrorResponse)$"Product with id {id} is not found!");
 
             return Ok(_mapper.Map<ProductResponse>(product));
@@ -72,9 +81,12 @@ namespace Web.Api.Controllers
         {
             var product = _mapper.Map<Product>(request);
             await _unitOfWork.ProductRepository.AddAsync(product);
-            return await _unitOfWork.Complete() > 0 ?
-                Ok(_mapper.Map<ProductResponse>(product))
-                : BadRequest((ErrorResponse)"Data not saved!");
+            if(await _unitOfWork.Complete() > 0)
+            {
+                await LoadProductsToCachedMemory();
+                return Ok(_mapper.Map<ProductResponse>(product));
+            }
+            return BadRequest((ErrorResponse)"Data not saved!");
         }
 
 
@@ -93,16 +105,19 @@ namespace Web.Api.Controllers
             var product = await _unitOfWork.ProductRepository.GetByIdAsync(id);
             if (product is null)
                 return NotFound((ErrorResponse)$"Product with id {id} is not found!");
-            
+
             product.Description = request.Description;
             product.DiscountPercent = request.DiscountPercent;
             product.Price = request.Price;
             product.CategoryId = request.CategoryId;
             product.Name = request.Name;
 
-            return await _unitOfWork.Complete() > 0 ?
-                Ok(_mapper.Map<ProductResponse>(product))
-                : BadRequest((ErrorResponse)"Data not saved!");
+            if (await _unitOfWork.Complete() > 0)
+            {
+                await LoadProductsToCachedMemory();
+                return Ok(_mapper.Map<ProductResponse>(product));
+            }
+            return BadRequest((ErrorResponse)"Data not saved!");
         }
 
 
@@ -121,9 +136,33 @@ namespace Web.Api.Controllers
                 return NotFound((ErrorResponse)$"Product with id {id} is not found!");
 
             var result = await _unitOfWork.ProductRepository.Delete(id);
-            return await _unitOfWork.Complete() > 0 && result ?
-                Ok("Product deleted successfully!") :
-                BadRequest((ErrorResponse)"Data not saved!");
+
+            if (await _unitOfWork.Complete() > 0)
+            {
+                await LoadProductsToCachedMemory();
+                return Ok("Product deleted successfully!");
+            }
+            return BadRequest((ErrorResponse)"Data not saved!");
+
+        }
+
+
+
+        private async Task<IEnumerable<Product>?> GetCachedProducts()
+        {
+            var products = _cacheService.Get<IEnumerable<Product>>("products");
+            if (products is null || !products.Any())
+            {
+                products = await LoadProductsToCachedMemory();
+            }
+            return products;
+        }
+
+        private async Task<IEnumerable<Product>> LoadProductsToCachedMemory()
+        {
+            var products = await _unitOfWork.ProductRepository.GetAllAsync();
+            _cacheService.Set("products", products.ToList(), DateTimeOffset.Now.AddMinutes(1));
+            return products;
         }
     }
 }

@@ -81,6 +81,11 @@ namespace Web.Api
             });
             #endregion
 
+            #region Caching
+            services.AddMemoryCache();
+            services.AddScoped<ICacheService,CacheService>();
+            #endregion
+
             return services;
         }
     }

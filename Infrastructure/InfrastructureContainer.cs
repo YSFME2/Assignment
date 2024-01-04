@@ -19,7 +19,7 @@ namespace Infrastructure
             services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
             services.AddDbContext<IAppDbContext, AppDbContext>((serviceProvider, options) =>
             {
-                options.AddInterceptors(serviceProvider.GetServices<AuditableEntityInterceptor>());
+                options.AddInterceptors(serviceProvider.GetServices<ISaveChangesInterceptor>());
 
                 options.UseLazyLoadingProxies().UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });

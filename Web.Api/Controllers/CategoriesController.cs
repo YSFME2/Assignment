@@ -23,6 +23,7 @@
         [Authorize]
         [HttpGet(ApiRoutes.Categories.Get)]
         [ProducesResponseType(typeof(CategoryResponse), 200)]
+        [ProducesResponseType(typeof(string), 404)]
         public async Task<IActionResult> GetAsync(int id)
         {
             var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
@@ -35,6 +36,7 @@
         [Authorize(Roles = "Admin")]
         [HttpPost(ApiRoutes.Categories.Create)]
         [ProducesResponseType(typeof(CategoryResponse), 200)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
         public async Task<IActionResult> CreateAsync(UpsertCategoryRequest request)
         {
             var category = _mapper.Map<Category>(request);
@@ -48,28 +50,37 @@
         [Authorize(Roles = "Admin")]
         [HttpPut(ApiRoutes.Categories.Update)]
         [ProducesResponseType(typeof(CategoryResponse), 200)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(string), 404)]
         public async Task<IActionResult> UpdateAsync(int id, UpsertCategoryRequest request)
         {
-            if (!await _unitOfWork.CategoryRepository.AnyAsync(x => x.Id == id))
+            var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
+            if (category is null)
                 return NotFound("Not Found Category with Id " + id);
+            
+            category.Description = request.Description;
+            category.Name = request.Name;
 
-            var category = _mapper.Map<Category>(request);
-            category.Id = id;
-            _unitOfWork.CategoryRepository.Update(category);
-            return await _unitOfWork.Complete() > 0 ? Ok(_mapper.Map<CategoryResponse>(category)) : BadRequest("Data not saved!");
+            return await _unitOfWork.Complete() > 0 ? 
+                Ok(_mapper.Map<CategoryResponse>(category)) 
+                : BadRequest((ErrorResponse)"Data not saved!");
         }
 
 
         [Authorize(Roles = "Admin")]
         [HttpDelete(ApiRoutes.Categories.Delete)]
         [ProducesResponseType(typeof(string), 200)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(string), 404)]
         public async Task<IActionResult> DeleteAsync(int id)
         {
             if (!await _unitOfWork.CategoryRepository.AnyAsync(x => x.Id == id))
                 return NotFound("Not Found Category with Id " + id);
 
             var result = await _unitOfWork.CategoryRepository.Delete(id);
-            return await _unitOfWork.Complete() > 0 && result ? Ok("Category deleted successfully!") : BadRequest("Data not saved!");
+            return await _unitOfWork.Complete() > 0 && result ? 
+                Ok("Category deleted successfully!") :
+                BadRequest((ErrorResponse)"Data not saved!");
         }
     }
 }

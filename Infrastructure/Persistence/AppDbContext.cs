@@ -1,4 +1,5 @@
 ﻿using Domain.Common;
+using Infrastructure.Persistence.Interceptors;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;

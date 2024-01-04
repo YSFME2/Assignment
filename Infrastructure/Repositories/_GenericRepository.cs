@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -59,12 +60,6 @@ namespace Infrastructure.Repositories
         public async Task<TEntity?> GetByIdAsync(int id)
         {
             return await _dbSet.FindAsync(id);
-        }
-
-        public TEntity Update(TEntity entity)
-        {
-            _dbSet.Update(entity);
-            return entity;
         }
     }
 }

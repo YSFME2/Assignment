@@ -10,6 +10,6 @@ namespace Web.Api.Services
         {
             this.httpContext = httpContext;
         }
-        public string? UserId => httpContext.HttpContext?.User?.Claims.FirstOrDefault(x=>x.Type == "userId")?.Value;
+        public string? UserId => httpContext.HttpContext?.User?.Claims.FirstOrDefault(x=>x.Type == "uid")?.Value;
     }
 }

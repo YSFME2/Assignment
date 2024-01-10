@@ -20,7 +20,6 @@ namespace Web.Api.Controllers
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _cacheService = cacheService;
-            throw new NotImplementedException();
         }
 
 
